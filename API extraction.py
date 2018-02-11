@@ -4,6 +4,7 @@ import requests
 import pprint
 import json
 pp = pprint.PrettyPrinter()
+import numpy as np
 
 
 #just get headlines
@@ -11,7 +12,7 @@ coinsHeadlinesURL = requests.get("https://newsapi.org/v2/top-headlines?sources=c
 
 coinsHeadlines = coinsHeadlinesURL.json()
 
-pp.pprint(coinsHeadlines)
+#pp.pprint(coinsHeadlines)
 
 
 #get all of the news
@@ -32,6 +33,9 @@ for i in range(0,len(articles)):
 	articlesList.append(article)
 	#print i, articlesList
 
-
-
-
+articlesList = np.array(articlesList)
+description = list(articlesList[:,0])
+title = list(articlesList[:,1])
+url = list(articlesList[:,2])
+author = list(articlesList[:,3])
+published = list(articlesList[:,4])
