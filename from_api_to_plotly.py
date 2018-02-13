@@ -55,8 +55,9 @@ for row in coinsList:
 	count +=1
 	counts.append(count)
 
-trace1 = go.Scatter(x=bitcoin , y=counts)
-py.iplot(trace1)
+trace = go.Scatter(x=[bitcoin] , y=[counts])
+data = [trace]
+py.iplot(data)
 
 
 
