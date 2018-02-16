@@ -116,3 +116,66 @@ with open('twitter.json', 'r') as f:
 	#rint(count_only.most_common(10))
 
 
+com=defaultdict(lambda :defaultdict(int))
+
+token = nltk.word_tokenize(tweet['text'])
+bigrams = ngrams(token,2)
+trigrams = ngrams(token,3)
+fourgrams = ngrams(token,4)
+fivegrams = ngrams(token,5)
+#rint Counter(bigrams)
+#rint Counter(trigrams)
+#rint Counter(fourgrams)
+#rint Counter(fivegrams)
+
+
+
+word_freq=count_all.most_common(20)
+labels, freq =zip(*word_freq)
+data={'data': freq, 'x':labels}
+bar=vincent.Bar(data,iter_idx='x')
+bar.to_json('term_freq.json', html_out=True, html_path='chart.html')
+
+
+bitcointags=[]
+
+
+with open('twitter.json', 'r') as f:
+	#ine=f.readline() #read only the first tweet/line
+	#weet=json.loads(line) #load it as a Python dict
+
+	for line in f:
+		tweet=json.loads(line) # as a Python dict
+	
+		terms_hash=[term for term in preprocess(tweet['text']) if term.startswith('#')]
+			#rint(terms_hash)
+			#track when the hashtag is mentioned
+	
+		if'#Bitcoin' in terms_hash:
+			bitcointags.append(tweet['created_at'])
+			#rint('this better work', bitcointags)
+			print(tweet['created_at'])
+		
+
+	#a list of "1" to count the hashtags
+ones=[1]*len(bitcointags)
+#the index of the series
+idx=pandas.DatetimeIndex(bitcointags)
+
+#the actual series 
+bitcointag=pandas.Series(ones, index=idx)
+#rint(len(bitcointag))
+
+#rint(bitcointag)
+#bucketing
+per_minute=bitcointag.resample('1Min', how='sum').fillna(0)
+
+#rint(per_minute[:5])
+time_chart=vincent.Line(per_minute)
+time_chart.axis_titles(x='Time', y='Freq')
+time_chart.to_json('time_chart.json', html_out=True, html_path='time_chart.html')
+
+
+
+
+
