@@ -10,8 +10,8 @@ from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 from nltk.tokenize import RegexpTokenizer
 from nltk.stem import PorterStemmer
+from nltk.stem import WordNetLemmatizer
 from collections import Counter
-import string
 import math
 import random as rand
 
@@ -32,7 +32,8 @@ rows = tableFromDatabase('cryptobase.db', 'coinsNews')
 coinsList = [list(row) for row in rows]
 
 # normalize words
-stop_words = set(stopwords.words('english'))
+stop_words = set(stopwords.words('english') + ['cryptocurrency', 'cryptocurrencies', 'u', '000'])
+lemmatizer = WordNetLemmatizer()
 ps = PorterStemmer()
 tokenizer = RegexpTokenizer(r'\w+') # takes only alphanum characters
 
@@ -42,7 +43,7 @@ counts = []
 for row in coinsList:
     word_tokens = tokenizer.tokenize(row[2])
     word_lower = [w.lower() for w in word_tokens]
-    word_stem = [ps.stem(w) for w in word_lower]
+    word_stem = [lemmatizer.lemmatize(w) for w in word_lower]
     filtered_row = [w for w in word_stem if not w in stop_words]
     normalized.append(filtered_row)
     counts.append(Counter(filtered_row))
@@ -93,7 +94,7 @@ trace1 = go.Scatter(
 data = [trace1]
 layout = go.Layout(title='Today\'s Top 20 Words Based on TF-IDF', titlefont=dict(
             size=32),    xaxis=dict(
-        title='Source: Crypto Coins News (www.ccn.com), API: https://newsapi.org/v2/everything?sources=crypto-coins-news',
+        title='Source: Crypto Coins News (www.ccn.com) API: https://newsapi.org/v2/everything?sources=crypto-coins-news&apiKey=1d656ac0916147bf8d28e1dcda71266a',
         autorange=True,
         showgrid=False,
         zeroline=False,
