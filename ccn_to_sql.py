@@ -10,10 +10,10 @@ coinsNews = coinsNewsURL.json()  # this is a dictionary
 
 articles = coinsNews['articles']
 dicKeys = articles[0].keys() # [u'description',u'title', u'url', u'author', u'publishedAt', u'source', u'urlToImage']
-keys= []
+keys = []
 for element in dicKeys:
-    keys.append(element)
-keys = keys[1:]
+    if element != 'source':
+        keys.append(element)
 
 articlesList = []
 colId = 0
