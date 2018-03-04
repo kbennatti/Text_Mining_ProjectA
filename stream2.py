@@ -138,12 +138,77 @@ with open('ethereum.json', 'r') as f:
 		terms_hash=[term for term in preprocess(tweet['text']) if term.startswith('#')] #look at '#' usage over time	
 		if'#Ethereum' in terms_hash:
 			bitcointags.append(tweet['created_at']) #'created_at' is when the tweet was posted by the user
-			
+
 ones=[1]*len(ethereumtags) #a list of "1" to count the hashtags
 idx=pandas.DatetimeIndex(ethereumtags) #the index of the series
 ethereumtag=pandas.Series(ones, index=idx) #the actual series 
 per_minute2=ethereumtag.resample('1Min', how='sum').fillna(0) #tracking the frequency over time
 
+'''
+python_object=json.loads(open("bitcoin_chart.json").read())
+
+
+#column one
+axes=python_object['axes']
+keys1=axes[0].keys()
+keys=[]
+for element in keys1:
+	keys.append(element)
+
+graphlist=[]
+
+for i in range(len(axes)):
+	graph=[]
+	for j in range(0, len(keys)):
+		graph.append(axes[i][keys[j]])
+	graphlist.append(graph)
+	#print(graphlist)
+
+#column two
+data=python_object['data']
+keys2=data[0].keys()
+keysb=[]
+for element in keys2:
+	keysb.append(element)
+
+graphlist1=[]
+
+for i in range(len(data)):
+	graph1=[]
+	for j in range(0, len(keysb)):
+		graph1.append(data[i][keysb[j]])
+	graphlist1.append(graph1)
+	#print(graphlist1)
+
+#column three
+scales=python_object['scales']
+keys3=scales[0].keys()
+keysc=[]
+for element in keys3:
+	keysc.append(element)
+
+graphlist2=[]
+
+for i in range(len(scales)):
+	graph2=[]
+	for j in range(0,len(keysc)):
+		if keysc[j]=='domain':
+			graph2.append(scales[i][keysc[j]]['data'])
+		elif keysc[j]=='field':
+			graph2.append(scales[i][keysc[j]]['data'])
+		else:
+			graph2.append(scales[i][keysc[j]])
+		graphlist2.append(graph2)
+		print(graphlist2)
+	
+conn=sqlite3.connect('cryptobase.db')
+c=conn.cursor()
+c.execute('DROP TABLE python_object')
+c.execute('CREATE TABLE python_object(scale TEXT, title INTERGER, type TEXT, name INTERGER, values INTERGER, height INTERGER, legends TEXT, marks TEXT, padding TEXT, scales INTERGER, width INTERGER)'  )
+c.executemany('INSERT INTO python_object VALUES(?,?,?,?,?,?,?,?,?,?,?)', graphlist, graphlist1, graphlist2)
+conn.commit()
+
+'''
 #graphing the usage over time
 time_chart=vincent.Line(bitcointag)
 time_chart.axis_titles(x='Time', y='Freq')
@@ -154,7 +219,7 @@ time_chart=vincent.Line(ethereumtag)
 time_chart.axis_titles(x='Time', y='Freq')
 time_chart.to_json('ethereum_chart.json', html_out=True, html_path='ethereum_chart.html')
 
-'''
+
 both_data=dict(bitcointag=per_minute_i, ethereumtag=per_minute_s)
 all_tags=pandas.DataFrame(data=both_data,
 			index=per_minute_i.index )
@@ -171,4 +236,4 @@ time_chart=vincent.Line(both_data[['Bitcoin', 'Ethereum']])
 time_chart.axis_titles(x='Time', y='Freq')
 time_chart.to_json('combined_chart.json', html_out=True, html_path='combined_chart.html')
 
-'''
+
