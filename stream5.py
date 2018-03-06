@@ -6,7 +6,7 @@ import nltk
 from nltk.corpus import stopwords 
 import string 
 from nltk import bigrams 
-import vincent 
+import vincent
 import pandas 
 from nltk.util import ngrams 
 import matplotlib.pyplot as plt
@@ -60,14 +60,14 @@ def preprocess(s, lowercase=False):
 
 #the following code checks to see if the above code was used to correctly take out the above terms from the text.  Tweet("text") is the variable in which the Twitter data is stored in the JSON file
 	
-with open('trial.json', 'r') as f:
+with open('bitcoin.json', 'r') as f:
 	for line in f:		
 		tweet=json.loads(line) #load it as a Python dict
 		tokens=preprocess(tweet['text'])
 		#print(preprocess(tweet['text']))
 
 #the Counter() function is a term dictionary that counts frequecies and allows us to see the most common terms used
-with open('trial.json', 'r') as f:
+with open('bitcoin.json', 'r') as f:
 	
 	count_all=Counter()
 	for line in f:
@@ -81,7 +81,7 @@ with open('trial.json', 'r') as f:
 #Terms that are common in Twitter language were added
 
 
-with open('trial.json', 'r') as f:
+with open('bitcoin.json', 'r') as f:
 	
 	count_term=Counter()
 	for line in f:
@@ -131,6 +131,7 @@ bitcointag=pandas.Series(ones, index=idx) #the actual series
 per_minute=bitcointag.resample('1Min', how='sum').fillna(0) #tracking the frequency over time
 
 
+
 ethereumtags=[]
 with open('ethereum.json', 'r') as f:
 	for line in f:
@@ -138,23 +139,68 @@ with open('ethereum.json', 'r') as f:
 		terms_hash=[term for term in preprocess(tweet['text']) if term.startswith('#')] #look at '#' usage over time	
 		if'#Ethereum' in terms_hash:
 			ethereumtags.append(tweet['created_at']) #'created_at' is when the tweet was posted by the user
-print(len(ethereumtags))
 ones=[1]*len(ethereumtags) #a list of "1" to count the hashtags
 idx=pandas.DatetimeIndex(ethereumtags) #the index of the series
-
 ethereumtag=pandas.Series(ones, index=idx) #the actual series 
 per_minute2=ethereumtag.resample('1Min', how='sum').fillna(0) #tracking the frequency over time
+
+
+both_data=dict(bitcointags=per_minute, ethereumtags=per_minute2)
+all_tags=pandas.DataFrame(data=both_data,
+			index=per_minute.index )
+all_tags=all_tags.resample('1Min', how='sum').fillna(0)
+#print(all_tags)
+
+'''
+time_chart=vincent.Line(per_minute)
+time_chart.axis_titles(x='Time', y='Freq')
+time_chart.to_json('bitcoin_chart.json', html_out=True, html_path='bitcoin_chart.html')
+
+
+time_chart=vincent.StackedArea(all_tags)
+time_chart.axis_titles(x='Time', y='Freq')
+time_chart.to_json('combined2_chart.json', html_out=True, html_path='combined2_chart.html')
+'''
+
+
+#c is to transfer pandas series to pandas dataframe
+c = per_minute.to_frame()
+
+#c.index is to get the row name.  The row name is the time the tweet was created at
+#d is a list
+d=c.index
+#a is a list with two columns.  Column one is the time and column two is the frequency
 a = []
+for i in range(len(d)):
+	row = []
+	row.append(str(d[i]))
+	row.append(per_minute.iloc[i])
+	a.append(row)
+
+
+e = per_minute2.to_frame()
+f=e.index
+
 b = []
-a=per_minute.tolist()
-b=per_minute2.tolist()
-print(type(a))
+for i in range(len(f)):
+	row = []
+	row.append(str(f[i]))
+	row.append(per_minute2.iloc[i])
+	b.append(row)
+
+#print(b)
+
+#storing the lists for bitcoin and ethereum into a database
+
 
 conn=sqlite3.connect('cryptobase.db')
 c=conn.cursor()
 c.execute('DROP TABLE IF EXISTS per_minute')
-c.execute('CREATE TABLE per_minute(frequency FLOAT)'  )
-c.executemany('INSERT INTO per_minute VALUES(?)', a)
+c.execute('CREATE TABLE per_minute(bitcoin TEXT, frequency FLOAT)'  )
+c.executemany('INSERT INTO per_minute VALUES(?, ?)', a)
+c.execute('SELECT * from per_minute')
+ 
+#print c.fetchall()
 conn.commit()
 conn.close()
 
@@ -162,9 +208,11 @@ conn.close()
 conn=sqlite3.connect('cryptobase.db')
 c=conn.cursor()
 c.execute('DROP TABLE IF EXISTS per_minute2')
-c.execute('CREATE TABLE per_minute2 (frequency FLOAT)'  )
-c.executemany('INSERT INTO per_minute2 VALUES(?)', b)
+c.execute('CREATE TABLE per_minute2 (ethereum TEXT, frequency FLOAT)'  )
+c.executemany('INSERT INTO per_minute2 VALUES(?,?)', b)
+#print c.fetchall()
 conn.commit()
 conn.close()
+
 
 
