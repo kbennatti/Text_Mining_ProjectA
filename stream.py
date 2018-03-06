@@ -44,21 +44,6 @@ twitter_stream.filter(track=['#Bitcoin'])
 #To check the output of this hashtag, uncomment the print statement below.  To get a good amount of twitter data, must let the stream.py run for some time.  
 #print('Streaming Twitter data. To stop streaming, press Ctrl and C', twitter_stream)
 
-class MyListener(StreamListener):
-	def on_data(self,data):
-		try:
-			with open('ethereum.json','a') as f:
-				f.write(data)
-				return True
-		except BaseException as e:
-			print("Error on_data: %s" % str(e))
-		return True
 
-	def on_error(self,status):
-		print(status)
-		return True
-
-twitter_stream=Stream(auth,MyListener())
-twitter_stream.filter(track=['#Ethereum'])
 
 
