@@ -6,7 +6,8 @@ from nltk.classify import NaiveBayesClassifier
 import csv
 import bs4
 import numpy as np
-
+import plotly.plotly as py
+import plotly.graph_objs as go
 import nltk
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
@@ -247,3 +248,16 @@ import pickle
 f = open('my_classifier.pickle', 'rb')
 classifier = pickle.load(f)
 f.close()
+
+x=[]
+y=[]
+trace1 = go.Scatter(
+    x=x,
+    y=y,
+)
+data = [trace1]
+layout = go.Layout(title=title, titlefont=dict(
+            size=32),
+    )
+fig = go.Figure(data=data, layout=layout)
+py.plot(fig, filename='prediction')
